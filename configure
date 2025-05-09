@@ -1108,7 +1108,7 @@ case "x$os" in
     cflags="$cflags -D_ALL_SOURCE"
     ldflags="-lbsd"
     ;;
-  "xIRIX")
+  "xIRIX"|"xIRIX64")
     cflags="$cflags -D_SGI_SOURCE"
     libs="-lgen"
     ;;
