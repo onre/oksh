@@ -16,7 +16,7 @@
 
 #if !defined(SMALL) && !defined(NO_CURSES)
 #ifdef HAVE_CURSES
-#ifdef __sgi
+#if defined(__sgi) && !defined(__GNU_C)
 # undef bool
 # include <curses.h>
 # include <term.h>
