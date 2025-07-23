@@ -14,6 +14,10 @@
 
 #include <sys/stat.h>
 
+#ifdef __sgi
+#include <sys/file.h>
+#endif
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>

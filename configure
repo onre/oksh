@@ -263,8 +263,13 @@ EOF
 
 cursescheck() {
   cat << EOF > conftest.c
+#ifdef __sgi
+#include <curses.h>
+#include <term.h>
+#else
 #include <term.h>
 #include <curses.h>
+#endif
 int main(void){setupterm(NULL, 0, NULL);return 0;}
 EOF
   $cc $cflags -o conftest.o -c conftest.c > /dev/null 2>&1
@@ -795,6 +800,7 @@ small=0
 strip=1
 
 xlc=0
+mipspro=0
 
 # Options
 for opt
@@ -1013,6 +1019,13 @@ if [ $? -eq 0 ] ; then
   xlc=1
 fi
 
+$cc -version 2>&1 | grep -q "MIPSpro Compilers"
+if [ $? -eq 0 ] ; then
+  echo "using MIPSpro, setting CFLAGS to -O3"
+  cflags="-O3 -DEMACS -DVI"
+  mipspro=1
+fi
+
 if [ "x$cflags" = "x-DEMACS -DVI" ] ; then
   printf "checking if the compiler accepts -g -O2... "
   defaultcflagscheck
@@ -1094,6 +1107,10 @@ case "x$os" in
   "xAIX"|"xOS400")
     cflags="$cflags -D_ALL_SOURCE"
     ldflags="-lbsd"
+    ;;
+  "xIRIX"|"xIRIX64")
+    cflags="$cflags -D_SGI_SOURCE"
+    libs="-lgen"
     ;;
   "xDarwin")
     if [ $xlc -eq 1 ] ; then
@@ -1217,6 +1234,9 @@ if [ $curses -eq 1 ] ; then
     libs="$libs -lcurses"
     echo "#define HAVE_CURSES" >> pconfig.h
     echo "curses.h"
+    if [ "x$os" = "xIRIX" ] || [ "x$os" = "xIRIX64" ] ; then
+      libs="$libs -ltermlib"
+    fi
   else
     ncursescheck
     if [ $? -eq 0 ] ; then
@@ -1422,9 +1442,11 @@ else
 fi
 
 printf "checking for out-of-tree build... "
-if [ "x$(dirname $0)" = "x." ] ; then
+dirname0=`dirname $0`
+builddir=`pwd`
+if [ "x${dirname0}" = "x." ] ; then
   echo "no"
-elif [ "x$(dirname $0)" = "x$(pwd)" ] ; then
+elif [ "x${dirname0}" = "x${pwd}" ] ; then
   echo "no"
 else
   echo "yes"

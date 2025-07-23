@@ -38,6 +38,9 @@ inittraps(void)
 #endif
 #if defined(HAVE_SIGLIST) && !defined(__linux__)
 			sigtraps[i].mess = sys_siglist[i];
+#elif defined(__sgi)
+			if (i < _sys_nsig)
+				sigtraps[i].mess = _sys_siglist[i];
 #else
 			static char *mess[NSIG + 1] = { NULL };
 			if (!mess[i])
